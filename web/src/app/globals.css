@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
+/*
+ * REACH brand tokens — names are fixed by the brand guide.
+ * Contrast rules (WCAG AA):
+ *   - Reach Teal (--brand-accent) is decorative on light backgrounds:
+ *     never text or interactive elements on white / Mist Gray.
+ *   - Links and buttons: Mountain Teal or Phoenix Purple.
+ *   - On Phoenix Purple: white or Reach Teal.
+ *   - --crisis is for crisis banners/buttons ONLY.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-primary: #24114d; /* Phoenix Purple */
+  --brand-primary-hover: #200f45; /* primary darkened 10% */
+  --brand-action: #177a8c; /* Mountain Teal */
+  --brand-action-hover: #156e7e; /* action darkened 10% */
+  --brand-accent: #14b7c1; /* Reach Teal — decorative on light */
+  --surface: #f2f2f2; /* Mist Gray */
+  --surface-raise: #ffffff;
+  --text-body: #2b2b33;
+  --crisis: #8c1d2f; /* crisis banners ONLY */
+  --crisis-hover: #7e1a2a; /* crisis darkened 10% */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-primary-hover: var(--brand-primary-hover);
+  --color-brand-action: var(--brand-action);
+  --color-brand-action-hover: var(--brand-action-hover);
+  --color-brand-accent: var(--brand-accent);
+  --color-surface: var(--surface);
+  --color-surface-raise: var(--surface-raise);
+  --color-text-body: var(--text-body);
+  --color-crisis: var(--crisis);
+  --color-crisis-hover: var(--crisis-hover);
+
+  --font-headline: var(--font-league-spartan), system-ui, sans-serif;
+  --font-subhead: var(--font-merriweather), Georgia, serif;
+  --font-sans: var(--font-source-sans-3), system-ui, sans-serif;
+  --font-accent: var(--font-satisfy), cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--surface-raise);
+  color: var(--text-body);
+  font-family: var(--font-sans);
+  font-size: 1rem; /* Source Sans 3 at 16px minimum */
+  line-height: 1.6;
+}
+
+/*
+ * 2px Mountain Teal focus ring with 2px offset, everywhere.
+ */
+:focus-visible {
+  outline: 2px solid var(--brand-action);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Keep summary markers visible but tame in the 911 tap-through. */
+summary {
+  cursor: pointer;
+}
+summary:focus-visible {
+  outline-offset: -2px;
 }
