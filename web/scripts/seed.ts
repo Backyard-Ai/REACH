@@ -293,17 +293,19 @@ const SAMPLE_ORGS: SampleOrg[] = [
 
 // ---------------------------------------------------------------- seed ----
 
-async function upsert<T extends Record<string, unknown>>(
+type Row = Record<string, unknown>;
+
+async function upsert(
   table: string,
-  rows: T[],
+  rows: Row[],
   onConflict: string,
-): Promise<T[]> {
+): Promise<Row[]> {
   const { data, error } = await db
     .from(table)
-    .upsert(rows, { onConflict, ignoreDuplicates: true })
+    .upsert(rows as never, { onConflict, ignoreDuplicates: true })
     .select();
   if (error) fail(`upsert ${table}`, error);
-  return (data ?? []) as T[];
+  return (data ?? []) as Row[];
 }
 
 async function idMap(
