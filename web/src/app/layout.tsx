@@ -1,41 +1,16 @@
 import type { Metadata } from "next";
-import {
-  League_Spartan,
-  Merriweather,
-  Source_Sans_3,
-  Satisfy,
-} from "next/font/google";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
-const leagueSpartan = League_Spartan({
-  subsets: ["latin"],
-  weight: "700",
-  variable: "--font-league-spartan",
-  display: "swap",
-});
-
-const merriweather = Merriweather({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-merriweather",
-  display: "swap",
-});
-
-const sourceSans3 = Source_Sans_3({
-  subsets: ["latin"],
-  variable: "--font-source-sans-3",
-  display: "swap",
-});
-
-const satisfy = Satisfy({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-satisfy",
-  display: "swap",
-});
+/*
+ * Brand typefaces load from the Google Fonts CDN at runtime (from the
+ * visitor's browser) rather than via next/font/google, which downloads
+ * files at dev/build time and breaks local dev when fonts.gstatic.com is
+ * unreachable. Family stacks are mapped in globals.css @theme.
+ */
+const GOOGLE_FONTS_HREF =
+  "https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,400..900;1,400..900&family=Satisfy&display=swap";
 
 export const metadata: Metadata = {
   title: {
@@ -50,10 +25,12 @@ export default function RootLayout({
   children,
 }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${leagueSpartan.variable} ${merriweather.variable} ${sourceSans3.variable} ${satisfy.variable} h-full antialiased`}
-    >
+    <html lang="en" className="h-full antialiased">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href={GOOGLE_FONTS_HREF} />
+      </head>
       <body className="min-h-full flex flex-col">
         <a
           href="#main-content"

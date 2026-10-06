@@ -34,10 +34,10 @@
   --color-crisis: var(--crisis);
   --color-crisis-hover: var(--crisis-hover);
 
-  --font-headline: var(--font-league-spartan), system-ui, sans-serif;
-  --font-subhead: var(--font-merriweather), Georgia, serif;
-  --font-sans: var(--font-source-sans-3), system-ui, sans-serif;
-  --font-accent: var(--font-satisfy), cursive;
+  --font-headline: "League Spartan", system-ui, sans-serif;
+  --font-subhead: "Merriweather", Georgia, serif;
+  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  --font-accent: "Satisfy", cursive;
 }
 
 html {
