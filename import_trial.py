@@ -5,6 +5,22 @@ Trial import of the July 30 master spreadsheet into the Phase 0 schema.
 Purpose is validation, not production: it proves the model holds the real
 data, and surfaces every row that needs a human decision. The production
 importer will be this logic plus geocoding.
+
+⚠ PHASE 1 NOTE (2026-10-07) — this trial predates schema v1.1/v1.2 and
+must NOT be used as a column-list reference. Known stale points, in
+order of how loudly they fail against v1.3.1:
+
+  1. contacts.is_public (line ~533) — v1.0 column, REMOVED in v1.1.
+     Contacts are fully private now; publishable county numbers live on
+     service_areas.public_phone. The generated SQL fails loudly here —
+     expected, do not "fix" by patching this file.
+  2. organisations.kind is never set — SILENT wrong default: all 137
+     mutual-aid groups would carry kind='service' and pollute the
+     services directory (schema section 4: kind keeps them out).
+     Production must set kind='meeting_group' for mutual-aid rows.
+  3. No import_runs / source_records rows — the v1.2 monthly-refresh
+     bookkeeping (UID-keyed upsert, content_hash, vanished handling)
+     does not exist here. Production imports write both tables.
 """
 import re, sys, unicodedata
 from collections import defaultdict, Counter
