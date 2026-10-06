@@ -26,9 +26,15 @@ no Supabase key of any kind ships to the browser.
    This is the *only* database object the app adds beyond the schema: a
    single function that runs full-text + trigram + synonym search inside
    Postgres and returns `published_resources` rows.
-3. **Install & env** — `npm install`, then create `.env.local` as above.
-4. **Seed** — `npx tsx scripts/seed.ts` (see below).
-5. **Dev / build** — `npm run dev`, `npm run build`, `npm run lint`.
+3. **Known issue** — `sql/002_spatial_ref_sys_rls.sql` documents an
+   ownership defect we cannot fix from user roles: dashboard-installed
+   PostGIS leaves `spatial_ref_sys` owned by `supabase_admin` with anon
+   write privileges and no RLS. Supabase support ticket filed; the
+   script's statements run only as the owner. See the file for the
+   verification probes.
+4. **Install & env** — `npm install`, then create `.env.local` as above.
+5. **Seed** — `npx tsx scripts/seed.ts` (see below).
+6. **Dev / build** — `npm run dev`, `npm run build`, `npm run lint`.
 
 ## The demo seed
 
