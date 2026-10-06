@@ -62,7 +62,7 @@ AS $$
                             'english', public.immutable_unaccent(n.raw_q))
                     OR  public.immutable_unaccent(coalesce(o.name, ''))
                             ILIKE n.tight_pattern
-                    OR  word_similarity(
+                    OR  public.word_similarity(
                             public.immutable_unaccent(n.raw_q),
                             public.immutable_unaccent(coalesce(o.name, ''))) > 0.45
                     OR  EXISTS (

@@ -47,8 +47,25 @@ function loadEnv(): { url: string; serviceKey: string } {
 }
 
 const { url, serviceKey } = loadEnv();
+
+// The network path to the project can reset long TLS streams; every seed
+// write is idempotent (upsert / delete-then-insert), so retries are safe.
+const retryFetch: typeof fetch = async (input, init) => {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      return await fetch(input, init);
+    } catch (e) {
+      lastError = e;
+      await new Promise((r) => setTimeout(r, 400 * 2 ** attempt));
+    }
+  }
+  throw lastError;
+};
+
 const db = createClient(url, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
+  global: { fetch: retryFetch },
 });
 
 function fail(scope: string, error: { message: string; details?: string | null; hint?: string | null } | null): never {
@@ -323,12 +340,23 @@ async function idMap(
 async function main() {
   console.log("REACH demo seed — the real import replaces the sample orgs.\n");
 
-  // 1. Region
-  const [region] = await upsert(
+  // 1. Region (upsert returns empty on an existing row with
+  // ignoreDuplicates, so fetch it in that case)
+  const regionRows = await upsert(
     "regions",
     [{ slug: "netn-reach", name: "Northeast Tennessee REACH", settings: {} }],
     "slug",
-  ).then((rows) => rows as unknown as { id: number; slug: string }[]);
+  );
+  let region = regionRows[0] as { id: number } | undefined;
+  if (!region) {
+    const { data, error } = await db
+      .from("regions")
+      .select("id")
+      .eq("slug", "netn-reach")
+      .single();
+    if (error || !data) fail("region lookup", error);
+    region = data as { id: number };
+  }
   const regionId = region.id;
   console.log(`✓ region netn-reach (id ${regionId})`);
 
@@ -427,7 +455,17 @@ async function main() {
       .select("id")
       .maybeSingle();
     if (orgError) fail(`organisation ${org.slug}`, orgError);
-    const orgId = orgRow!.id;
+    let orgId = orgRow?.id;
+    if (!orgId) {
+      const { data: existing, error: lookupErr } = await db
+        .from("organisations")
+        .select("id")
+        .eq("region_id", regionId)
+        .eq("slug", org.slug)
+        .single();
+      if (lookupErr || !existing) fail(`organisation lookup ${org.slug}`, lookupErr);
+      orgId = existing.id;
+    }
 
     // categories
     const catRows = org.categories.map((c) => ({
