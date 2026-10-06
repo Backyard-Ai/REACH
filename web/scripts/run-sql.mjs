@@ -35,8 +35,28 @@ const watchdog = setTimeout(() => {
 }, 360_000);
 watchdog.unref();
 
-const client = new Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
-await client.connect();
+function makeClient() {
+  return new Client({
+    connectionString: url,
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: 20_000,
+    statement_timeout: 120_000,
+    query_timeout: 120_000,
+  });
+}
+
+let client;
+for (let attempt = 1; ; attempt++) {
+  try {
+    client = makeClient();
+    await client.connect();
+    break;
+  } catch (e) {
+    if (attempt >= 6) throw e;
+    console.error(`connect failed (attempt ${attempt}): ${e.message} — retrying`);
+    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+  }
+}
 console.log("connected");
 
 for (const file of files) {
