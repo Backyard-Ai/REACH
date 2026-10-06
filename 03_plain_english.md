@@ -27,8 +27,9 @@ Four ideas do the work:
   category, operate from more than one address, and keep several contacts.
 - **A place is separate from the organisation that uses it.** Places are
   shared — a church hall in Johnson City hosts fifteen different meetings.
-- **Coverage is separate from address.** Every listing has zero or one address
-  and zero or more counties it serves. A programme with no office is then an
+- **Coverage is separate from address.** Every listing has any number of
+  physical addresses — most have one, some none, and a few several — and
+  zero or more counties it serves. A programme with no office is then an
   ordinary row, not a special case.
 - **A meeting is an event series held at a place, with its own recurring
   schedule** — so one venue can host many, and one meeting can sit at several
@@ -158,9 +159,11 @@ which becomes a usable filter.
 ### 2 · Coverage and address are separate concerns
 
 The address-less records don't differ structurally from pinned ones — and
-that is the point. Every listing has zero or one address and zero or more
-counties it serves. A treatment centre has both: a pin, and the counties it
-takes referrals from. ROPS has coverage and no pin. Modelling the
+that is the point. Every listing has any number of physical addresses —
+most have one, some none, and a few several (ReVida Recovery Center
+operates from four) — and zero or more counties it serves. A treatment
+centre has both: a pin, and the counties it takes referrals from. ROPS
+has coverage and no pin. Modelling the
 address-less rows as an exception would have needed a special case in every
 query.
 

@@ -76,6 +76,10 @@ export const resourceSchema = z.object({
   county_coverage: z.array(countyCoverageSchema),
   locations: z.array(locationSchema),
   hours: z.array(hoursEntrySchema),
+  // optional() as well as nullable() so parsing also succeeds against a
+  // database where the v1.4 view update (appended parent_id) has not
+  // been run yet; after the migration the key is always present.
+  parent_id: z.number().int().nullable().optional(),
 });
 
 // The schedule JSON from published_meetings (meetings path, later phase)
@@ -132,6 +136,24 @@ function db(): SupabaseClient {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   return cached;
+}
+
+// Service-role client — server routes only, never imported by client
+// components, never bundled for the browser.
+let serviceCached: SupabaseClient | null = null;
+
+function serviceDb(): SupabaseClient {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error(
+      "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.",
+    );
+  }
+  serviceCached ??= createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  return serviceCached;
 }
 
 function warn(scope: string, error: unknown) {
@@ -278,41 +300,74 @@ export async function getResourceBySlug(
 }
 
 // ---------------------------------------------------------------------------
-// Submissions — "this information is wrong" stub.
-// The anon INSERT policy allows exactly this shape: kind='correction',
-// status='pending', reviewer fields empty.
+// Submissions — inserted ONLY by the server route (src/app/api/submissions)
+// via the service-role client, with Turnstile and rate limiting applied
+// there. The anonymous INSERT policy was removed in the v1.4 migration;
+// this module no longer writes through the anon client.
 // ---------------------------------------------------------------------------
 
-export async function submitCorrection(input: {
-  regionId: number;
-  organisationId: number;
-  resourceSlug: string;
-  resourceName: string;
-  details: string;
-  submitterEmail?: string;
-}): Promise<{ ok: boolean; message?: string }> {
-  try {
-    const { error } = await db().from("submissions").insert({
-      region_id: input.regionId,
-      kind: "correction",
-      status: "pending",
-      organisation_id: input.organisationId,
-      payload: {
-        resource_slug: input.resourceSlug,
-        resource_name: input.resourceName,
-        details: input.details,
-        submitted_at: new Date().toISOString(),
-      },
-      submitter_email: input.submitterEmail || null,
-    });
+export type SubmissionKind = "new_listing" | "update_listing" | "correction";
+
+export async function countRecentSubmissionsByIp(
+  sourceIpHash: string,
+  windowHours = 1,
+): Promise<number> {
+  const since = new Date(Date.now() - windowHours * 3600_000).toISOString();
+  const { count, error } = await serviceDb()
+    .from("submissions")
+    .select("id", { count: "exact", head: true })
+    .eq("source_ip_hash", sourceIpHash)
+    .gte("created_at", since);
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export async function resolveRegionId(
+  organisationId?: number,
+  regionId?: number,
+): Promise<number> {
+  if (regionId) return regionId;
+  if (organisationId) {
+    const { data, error } = await serviceDb()
+      .from("organisations")
+      .select("region_id")
+      .eq("id", organisationId)
+      .maybeSingle();
     if (error) throw error;
-    return { ok: true };
-  } catch (e) {
-    warn("submitCorrection", e);
-    return {
-      ok: false,
-      message:
-        "The report could not be sent right now. Please try again in a moment.",
-    };
+    if (data) return data.region_id;
   }
+  const { data, error } = await serviceDb()
+    .from("regions")
+    .select("id")
+    .order("id")
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) {
+    throw error ?? new Error("No region exists to attach a submission to.");
+  }
+  return data.id;
+}
+
+export async function createSubmission(input: {
+  regionId: number;
+  kind: SubmissionKind;
+  organisationId?: number;
+  payload: Record<string, unknown>;
+  submitterName?: string;
+  submitterEmail?: string;
+  submitterOrgRole?: string;
+  sourceIpHash?: string;
+}): Promise<void> {
+  const { error } = await serviceDb().from("submissions").insert({
+    region_id: input.regionId,
+    kind: input.kind,
+    status: "pending",
+    organisation_id: input.organisationId ?? null,
+    payload: input.payload,
+    submitter_name: input.submitterName ?? null,
+    submitter_email: input.submitterEmail ?? null,
+    submitter_org_role: input.submitterOrgRole ?? null,
+    source_ip_hash: input.sourceIpHash ?? null,
+  });
+  if (error) throw error;
 }

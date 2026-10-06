@@ -13,7 +13,9 @@ Copy `.env.example` to `.env.local` and fill in:
 | ---------------------------- | -------------------------- | ------------------------------------------------------------ |
 | `SUPABASE_URL`               | `src/lib/db.ts` (server)   | Project URL, e.g. `https://xxxx.supabase.co`                 |
 | `SUPABASE_ANON_KEY`          | `src/lib/db.ts` (server)   | Publishable key. RLS gates every read; never sent to browser |
-| `SUPABASE_SERVICE_ROLE_KEY`  | `scripts/seed.ts` only     | **Never** in app code or the client bundle                   |
+| `SUPABASE_SERVICE_ROLE_KEY`  | seed script + submissions route (server) | **Never** in client code or the client bundle |
+| `TURNSTILE_SECRET_KEY`       | `/api/submissions` (server)  | Optional; absent = verification skipped (dev) |
+| `IP_HASH_SALT`               | `/api/submissions` (server)  | Optional salt for rate-limit IP hashing |
 
 All app data access is server-side (server components + server actions) —
 no Supabase key of any kind ships to the browser.
@@ -26,15 +28,20 @@ no Supabase key of any kind ships to the browser.
    This is the *only* database object the app adds beyond the schema: a
    single function that runs full-text + trigram + synonym search inside
    Postgres and returns `published_resources` rows.
-3. **Known issue** — `sql/002_spatial_ref_sys_rls.sql` documents an
+3. **v1.4 migration** — run `sql/002_v1.4_migration.sql` (parent
+   organisation link, parent_id in the feed, anonymous submissions INSERT
+   policy removed in favour of the server route). Idempotent. Deploy the
+   app first — the route works with or without the old policy; the
+   policy drop must not precede the new route.
+4. **Known issue** — `sql/003_spatial_ref_sys_rls.sql` documents an
    ownership defect we cannot fix from user roles: dashboard-installed
    PostGIS leaves `spatial_ref_sys` owned by `supabase_admin` with anon
    write privileges and no RLS. Supabase support ticket filed; the
    script's statements run only as the owner. See the file for the
    verification probes.
-4. **Install & env** — `npm install`, then create `.env.local` as above.
-5. **Seed** — `npx tsx scripts/seed.ts` (see below).
-6. **Dev / build** — `npm run dev`, `npm run build`, `npm run lint`.
+5. **Install & env** — `npm install`, then create `.env.local` as above.
+6. **Seed** — `npx tsx scripts/seed.ts` (see below).
+7. **Dev / build** — `npm run dev`, `npm run build`, `npm run lint`.
 
 ## The demo seed
 

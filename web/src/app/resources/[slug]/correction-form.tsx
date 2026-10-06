@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
-import {
-  submitCorrectionAction,
-  type CorrectionState,
-} from "./actions";
+import { useState } from "react";
 
-const INITIAL: CorrectionState = { status: "idle" };
+type FormState =
+  | { status: "idle" }
+  | { status: "sending" }
+  | { status: "ok"; message: string }
+  | { status: "error"; message: string };
 
 export function CorrectionForm({
   regionId,
@@ -19,10 +19,48 @@ export function CorrectionForm({
   resourceSlug: string;
   resourceName: string;
 }) {
-  const [state, action, pending] = useActionState(
-    submitCorrectionAction,
-    INITIAL,
-  );
+  const [state, setState] = useState<FormState>({ status: "idle" });
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const details = String(new FormData(form).get("details") ?? "").trim();
+    const submitterEmail = String(
+      new FormData(form).get("submitterEmail") ?? "",
+    ).trim();
+
+    setState({ status: "sending" });
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "correction",
+          organisation_id: organisationId,
+          region_id: regionId,
+          payload: {
+            resource_slug: resourceSlug,
+            resource_name: resourceName,
+            details,
+            submitted_at: new Date().toISOString(),
+          },
+          submitter_email: submitterEmail || undefined,
+        }),
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      setState({
+        status: "ok",
+        message: "Thank you — a person will review this listing.",
+      });
+      form.reset();
+    } catch {
+      setState({
+        status: "error",
+        message:
+          "The report could not be sent right now. Please try again in a moment.",
+      });
+    }
+  }
 
   if (state.status === "ok") {
     return (
@@ -32,12 +70,10 @@ export function CorrectionForm({
     );
   }
 
+  const busy = state.status === "sending";
+
   return (
-    <form action={action} className="grid gap-3">
-      <input type="hidden" name="regionId" value={regionId} />
-      <input type="hidden" name="organisationId" value={organisationId} />
-      <input type="hidden" name="resourceSlug" value={resourceSlug} />
-      <input type="hidden" name="resourceName" value={resourceName} />
+    <form onSubmit={handleSubmit} className="grid gap-3">
       <div>
         <label
           htmlFor="correction-details"
@@ -50,6 +86,7 @@ export function CorrectionForm({
           name="details"
           rows={3}
           required
+          minLength={3}
           maxLength={2000}
           placeholder="For example: the phone number changed, or the hours are out of date."
           className="w-full px-3 py-2 rounded-md text-base text-text-body bg-surface-raise border-2 border-transparent focus:border-brand-action"
@@ -69,17 +106,17 @@ export function CorrectionForm({
           className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border-2 border-transparent focus:border-brand-action"
         />
       </div>
-      {state.status === "error" && state.message && (
+      {state.status === "error" && (
         <p role="alert" className="text-base font-semibold text-crisis m-0">
           {state.message}
         </p>
       )}
       <button
         type="submit"
-        disabled={pending}
+        disabled={busy}
         className="justify-self-start min-h-11 px-5 rounded-md bg-brand-primary text-white font-headline font-bold hover:bg-brand-primary-hover disabled:opacity-60"
       >
-        {pending ? "Sending…" : "Send report"}
+        {busy ? "Sending…" : "Send report"}
       </button>
     </form>
   );
