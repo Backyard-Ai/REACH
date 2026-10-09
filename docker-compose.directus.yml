@@ -1,0 +1,33 @@
+# Self-hosted Directus against the REACH Supabase database.
+# Copy .env.directus.example to .env.directus, fill the values, then:
+#   docker compose -f docker-compose.directus.yml --env-file .env.directus up -d
+#
+# Local-instance-first is deliberate: Directus stores its configuration
+# (collections, roles, permissions) as directus_* tables IN our database,
+# so everything configured here travels to the future hosted instance.
+
+services:
+  directus:
+    image: directus/directus:11
+    restart: unless-stopped
+    ports:
+      - "8055:8055"
+    environment:
+      KEY: "${DIRECTUS_KEY}"
+      SECRET: "${DIRECTUS_SECRET}"
+      # Directus license (Open Innovation Grant) — env-var activation,
+      # the third option in the grant email. The value lives only in
+      # .env.directus (gitignored), never in this file.
+      LICENSE_KEY: "${DIRECTUS_LICENSE_KEY}"
+      ADMIN_EMAIL: "${DIRECTUS_ADMIN_EMAIL}"
+      ADMIN_PASSWORD: "${DIRECTUS_ADMIN_PASSWORD}"
+      DB_CLIENT: "postgres"
+      DB_HOST: "aws-0-us-west-2.pooler.supabase.com"
+      DB_PORT: "5432"
+      DB_USER: "directus"
+      DB_PASSWORD: "${DIRECTUS_DB_PASSWORD}"
+      DB_DATABASE: "postgres"
+      WEBSOCKETS_ENABLED: "false"
+      # Keep the admin surface sane; tighten before anyone else touches it.
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "true"
