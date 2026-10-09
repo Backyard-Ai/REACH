@@ -64,13 +64,19 @@ GRANT CONNECT ON DATABASE postgres TO directus;
 GRANT USAGE ON SCHEMA public TO directus;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO directus;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO directus;
-ALTER DEFAULT PRIVILEGES FOR ROLE directus IN SCHEMA public
+-- No "FOR ROLE directus" default privileges needed (and they cannot be
+-- set from the SQL Editor anyway — altering another role's defaults
+-- requires being that role): creators own what they create, and
+-- Supabase's anon/authenticated defaults are per-creator-role, so
+-- directus-created tables inherit nothing to revoke. The real
+-- isolation proof is the anon-key check on directus_users (item 7).
+-- Future app migrations run as postgres in the SQL Editor; grant the
+-- same privileges on tables postgres will create, or they'd be
+-- invisible to Directus:
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO directus;
--- Critical: Directus creates directus_* tables in public AFTER our schema
--- ran, and Supabase's default privileges would expose new public-schema
--- tables to the API roles. Strip that inheritance for tables Directus creates:
-ALTER DEFAULT PRIVILEGES FOR ROLE directus IN SCHEMA public
-  REVOKE ALL ON TABLES FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  GRANT USAGE, SELECT ON SEQUENCES TO directus;
 ```
 
 - Directus connects via the **direct connection** (port 5432) or the session
