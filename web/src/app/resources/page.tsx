@@ -68,7 +68,7 @@ export default async function ResourcesPage({
                 type="search"
                 defaultValue={q}
                 placeholder="Name, service, or keyword"
-                className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border-2 border-transparent focus:border-brand-action"
+                className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border border-[#C9C9CE] focus:border-brand-action"
               />
             </div>
             <div>
@@ -82,7 +82,7 @@ export default async function ResourcesPage({
                 id="filter-topic"
                 name="topic"
                 defaultValue={topic}
-                className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border-2 border-transparent focus:border-brand-action"
+                className="select-chevron w-full min-h-11 pl-3 rounded-md text-base text-text-body bg-surface-raise border border-[#C9C9CE] focus:border-brand-action"
               >
                 <option value="">Any topic</option>
                 {topics.map((t) => (
@@ -103,7 +103,7 @@ export default async function ResourcesPage({
                 id="filter-county"
                 name="county"
                 defaultValue={county}
-                className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border-2 border-transparent focus:border-brand-action"
+                className="select-chevron w-full min-h-11 pl-3 rounded-md text-base text-text-body bg-surface-raise border border-[#C9C9CE] focus:border-brand-action"
               >
                 <option value="">All counties</option>
                 {counties.map((c) => (

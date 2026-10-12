@@ -184,7 +184,7 @@ export function CorrectionForm({
           minLength={3}
           maxLength={2000}
           placeholder="For example: the phone number changed, or the hours are out of date."
-          className="w-full px-3 py-2 rounded-md text-base text-text-body bg-surface-raise border-2 border-transparent focus:border-brand-action"
+          className="w-full px-3 py-2 rounded-md text-base text-text-body bg-surface-raise border border-[#C9C9CE] focus:border-brand-action"
         />
       </div>
       <div>
@@ -198,7 +198,7 @@ export function CorrectionForm({
           id="correction-email"
           name="submitterEmail"
           type="email"
-          className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border-2 border-transparent focus:border-brand-action"
+          className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border border-[#C9C9CE] focus:border-brand-action"
         />
       </div>
       {SITE_KEY && (
