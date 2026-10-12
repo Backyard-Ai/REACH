@@ -30,7 +30,7 @@ declare global {
 
 // Inlined at build time: absent key = no widget, and the API route
 // skips verification when the secret is absent — dev keeps working.
-const SITE_KEY = process.env.NEXT_TURNSTILE_SITE_KEY;
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function CorrectionForm({
   regionId,

@@ -15,7 +15,7 @@ Copy `.env.example` to `.env.local` and fill in:
 | `SUPABASE_ANON_KEY`          | `src/lib/db.ts` (server)   | Publishable key. RLS gates every read; never sent to browser |
 | `SUPABASE_SERVICE_ROLE_KEY`  | seed script + submissions route (server) | **Never** in client code or the client bundle |
 | `TURNSTILE_SECRET_KEY`       | `/api/submissions` (server)  | Optional; absent = verification skipped (dev) |
-| `NEXT_TURNSTILE_SITE_KEY` | correction form (client) | Public by design; build-time inlined — redeploy after setting |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | correction form (client) | Public by design; build-time inlined — redeploy after setting |
 | `IP_HASH_SALT`               | `/api/submissions` (server)  | Optional salt for rate-limit IP hashing |
 
 All app data access is server-side (server components + server actions) —
