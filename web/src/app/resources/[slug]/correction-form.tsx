@@ -133,18 +133,25 @@ export function CorrectionForm({
           turnstile_token: token || undefined,
         }),
       });
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(body?.error ?? `Request failed (${res.status})`);
+      }
       setState({
         status: "ok",
         message: "Thank you — a person will review this listing.",
       });
       form.reset();
       resetWidget();
-    } catch {
+    } catch (e) {
       setState({
         status: "error",
         message:
-          "The report could not be sent right now. Please try again in a moment.",
+          e instanceof Error && e.message && !e.message.startsWith("Request failed")
+            ? e.message
+            : "The report could not be sent right now. Please try again in a moment.",
       });
       resetWidget();
     }

@@ -36,7 +36,6 @@ function ipHash(ip: string): string {
 
 async function verifyTurnstile(
   token: string | undefined,
-  ip: string,
 ): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) {
@@ -50,17 +49,26 @@ async function verifyTurnstile(
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          secret,
-          response: token,
-          remoteip: ip,
-        }),
+        // remoteip deliberately omitted: Vercel's view of the client IP
+        // can differ from what Cloudflare observed at challenge time
+        // (IPv6 vs IPv4), producing false negatives. It's optional.
+        body: new URLSearchParams({ secret, response: token }),
         signal: AbortSignal.timeout(10_000),
       },
     );
     const data = (await res.json()) as { success?: boolean };
+    if (data.success !== true) {
+      console.warn(
+        "[submissions] turnstile rejected:",
+        JSON.stringify(data),
+      );
+    }
     return data.success === true;
-  } catch {
+  } catch (e) {
+    console.warn(
+      "[submissions] turnstile siteverify unreachable:",
+      e instanceof Error ? e.message : e,
+    );
     return false;
   }
 }
@@ -100,7 +108,13 @@ export async function POST(request: Request) {
   }
 
   const ip = clientIp(request);
-  if (!(await verifyTurnstile(body.turnstile_token, ip))) {
+  if (!body.turnstile_token && process.env.TURNSTILE_SECRET_KEY) {
+    return NextResponse.json(
+      { error: "Please complete the verification and try again." },
+      { status: 400 },
+    );
+  }
+  if (!(await verifyTurnstile(body.turnstile_token))) {
     return NextResponse.json(
       { error: "Verification failed — please try again." },
       { status: 400 },
