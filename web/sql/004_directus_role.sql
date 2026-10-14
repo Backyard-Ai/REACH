@@ -34,9 +34,18 @@ END;
 $$;
 
 GRANT CONNECT ON DATABASE postgres TO directus;
-GRANT USAGE ON SCHEMA public TO directus;
+-- CREATE matters: Directus lays down its directus_* system tables in
+-- public on first boot, and modern Supabase no longer grants PUBLIC
+-- create on the schema.
+GRANT USAGE, CREATE ON SCHEMA public TO directus;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO directus;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO directus;
+
+-- Directus's own connection needs the extensions schema on its path
+-- (PostGIS lives there post-relocation; its introspection queries
+-- geometry_columns/geography_columns unqualified). Applied 2026-10-12;
+-- recorded here so the next environment gets it from the start.
+ALTER ROLE directus SET search_path = public, extensions;
 
 -- Future app migrations (v1.5+) run as postgres in the SQL Editor.
 -- Default privileges are per-creator-role: without these, any table a

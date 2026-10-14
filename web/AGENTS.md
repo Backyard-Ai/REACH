@@ -28,3 +28,22 @@ is future work — this records the spec it must implement:
 Partner access (near-term): per-partner read-only database role with
 SELECT on published_resources and published_meetings only; CSV export
 until a partner actually asks. Don't build the roles now.
+
+## Directus ops notes (2026-10-12, first successful bootstrap)
+
+- Pooler usernames MUST carry the project suffix: `directus.<ref>`,
+  not `directus` — Supavisor routes by it (ENOIDENTIFIER otherwise).
+- Bootstrapping over a flaky long-haul link fails: Directus's ~100
+  migrations each cost a round-trip and interruptions wedge its
+  bookkeeping ("column already exists" loops). Procedure that worked:
+  bootstrap locally (`docker-compose.directus-bootstrap.yml`, empty
+  local Postgres), `pg_dump --inserts --no-owner --no-privileges`,
+  strip `\restrict` lines, restore to production as the directus role
+  in one transaction. Filter `^\\` from the dump — psql meta-commands
+  break non-psql drivers.
+- Post-relocation, the directus role needs
+  `search_path = public, extensions` (ALTER ROLE … SET) AND the
+  compatibility views in `sql/005_directus_postgis_compat.sql`, or
+  Directus introspection dies on geometry_columns/geography_columns.
+- directus_* tables are owned by the directus role: schema surgery on
+  them (drops, column fixes) must run connected AS directus.

@@ -59,9 +59,12 @@ ALTER DEFAULT PRIVILEGES FOR ROLE reach_import IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO reach_import;
 
 -- Directus: creates its own directus_* tables AND edits content.
+-- CREATE matters: modern Supabase grants no PUBLIC create on public,
+-- and Directus lays down its system tables there on first boot.
 CREATE ROLE directus LOGIN PASSWORD '<generate>' BYPASSRLS;
 GRANT CONNECT ON DATABASE postgres TO directus;
-GRANT USAGE ON SCHEMA public TO directus;
+GRANT USAGE, CREATE ON SCHEMA public TO directus;
+ALTER ROLE directus SET search_path = public, extensions;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO directus;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO directus;
 -- No "FOR ROLE directus" default privileges needed (and they cannot be

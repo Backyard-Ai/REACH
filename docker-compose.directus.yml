@@ -24,9 +24,12 @@ services:
       DB_CLIENT: "postgres"
       DB_HOST: "aws-0-us-west-2.pooler.supabase.com"
       DB_PORT: "5432"
-      DB_USER: "directus"
+      DB_USER: "directus.htzmessdmdtonjybqvth"
       DB_PASSWORD: "${DIRECTUS_DB_PASSWORD}"
       DB_DATABASE: "postgres"
+      # PostGIS lives in the extensions schema post-relocation; knex
+      # overrides role-level search_path defaults, so set it explicitly.
+      DB_SEARCH_PATH: "public, extensions"
       WEBSOCKETS_ENABLED: "false"
       # Keep the admin surface sane; tighten before anyone else touches it.
       CORS_ENABLED: "true"

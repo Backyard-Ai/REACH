@@ -1,0 +1,34 @@
+# One-shot LOCAL Directus bootstrap, used to build its system tables
+# fast and reliably, then ship them to production as a single restore
+# (see scripts story in the repo README/AGENTS). Not the real instance.
+#
+#   docker compose -f docker-compose.directus-bootstrap.yml --env-file .env.directus up -d
+#
+# Uses the same ADMIN_* / KEY / SECRET as production (from .env.directus)
+# so the admin account that lands in the database matches.
+
+services:
+  bootstrap-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: bootstrap-local
+      POSTGRES_DB: postgres
+  bootstrap-directus:
+    image: directus/directus:11
+    depends_on:
+      - bootstrap-db
+    ports:
+      - "8056:8055"
+    environment:
+      KEY: "${DIRECTUS_KEY}"
+      SECRET: "${DIRECTUS_SECRET}"
+      ADMIN_EMAIL: "${DIRECTUS_ADMIN_EMAIL}"
+      ADMIN_PASSWORD: "${DIRECTUS_ADMIN_PASSWORD}"
+      DB_CLIENT: "postgres"
+      DB_HOST: "bootstrap-db"
+      DB_PORT: "5432"
+      DB_USER: "directus"
+      DB_PASSWORD: "bootstrap-local"
+      DB_DATABASE: "postgres"
+      WEBSOCKETS_ENABLED: "false"
