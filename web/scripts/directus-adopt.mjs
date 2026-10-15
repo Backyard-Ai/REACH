@@ -8,14 +8,17 @@
  */
 import { readFileSync } from "node:fs";
 
-const env = Object.fromEntries(
-  readFileSync(new URL("../../.env.directus", import.meta.url), "utf8")
-    .trim()
-    .split("\n")
-    .map((l) => l.split("=")),
-);
+const env = {
+  ...Object.fromEntries(
+    readFileSync(new URL("../../.env.directus", import.meta.url), "utf8")
+      .trim()
+      .split("\n")
+      .map((l) => l.split("=")),
+  ),
+  ...process.env,
+};
 
-const BASE = "http://localhost:8055";
+const BASE = process.env.DIRECTUS_URL ?? "http://localhost:8055";
 
 async function main() {
   const login = await fetch(`${BASE}/auth/login`, {
