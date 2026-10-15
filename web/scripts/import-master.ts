@@ -384,6 +384,8 @@ interface OrgPlan {
   orgPlaces: string[]; coverage: { fips: string; phone: string | null; contactName: string | null }[];
   servedFromText: string[];
   meetings: { row: Row; sittings: Sitting[]; room: string | null; fellowship: string | null; codes: string[] }[];
+  needsReview: boolean;
+  reviewNote: string | null;
 }
 
 const FELLOWSHIPS: [string, RegExp][] = [
@@ -447,6 +449,8 @@ for (const g of groups.values()) {
     coverage: [],
     servedFromText: [],
     meetings: [],
+    needsReview: false,
+    reviewNote: null,
   };
   for (const c of plan.categories) {
     if (!resolveCategory(c)) warn("category_unmapped", `${g.name}: ${c}`);
@@ -496,6 +500,25 @@ for (const g of groups.values()) {
       bump("meeting_schedules", sittings.length);
     }
   }
+  // human-review flags: the doc promises "flags the row" — merge conflicts
+  // and schedule-less meetings surface on the org in Directus, not just
+  // in the import report. Insert-only: monthly re-runs never overwrite or
+  // clear them (humans clear them through review).
+  const conflictBits: string[] = [];
+  for (const col of ["website", "description"] as const) {
+    if (conflicts[col]) conflictBits.push(`${col} has ${conflicts[col].size} values — first kept`);
+  }
+  const noSchedule = plan.meetings.filter((m) => m.sittings.length === 0).length;
+  const reviewBits: string[] = [];
+  if (conflictBits.length) {
+    reviewBits.push(`source disagrees across ${g.uids.join(",")}: ${conflictBits.join("; ")}`);
+  }
+  if (noSchedule) {
+    reviewBits.push(`${noSchedule} meeting${noSchedule === 1 ? "" : "s"} named without day/time — supply schedules`);
+  }
+  plan.needsReview = reviewBits.length > 0;
+  plan.reviewNote = reviewBits.join(" | ") || null;
+
   plans.push(plan);
 }
 
@@ -674,15 +697,16 @@ async function main() {
     const orgRow = await client.query(
       `INSERT INTO organisations
          (region_id,slug,name,kind,description,additional_info,website,public_phone,public_email,
-          status,last_verified_on,legacy_uids)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'published','2026-07-30',$10)
+          status,last_verified_on,legacy_uids,needs_review,review_note)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'published','2026-07-30',$10,$11,$12)
        ON CONFLICT (region_id,slug) DO UPDATE SET
          description = EXCLUDED.description, website = EXCLUDED.website,
          public_phone = EXCLUDED.public_phone, public_email = EXCLUDED.public_email,
          additional_info = EXCLUDED.additional_info
        RETURNING id`,
       [regionId, g.slug, g.name, plan.kind, plan.description, plan.additional,
-       plan.website, plan.publicPhone, plan.publicEmail, g.uids],
+       plan.website, plan.publicPhone, plan.publicEmail, g.uids,
+       plan.needsReview, plan.reviewNote],
     );
     const orgId = orgRow.rows[0].id as number;
     if (firstSeen) added++;
