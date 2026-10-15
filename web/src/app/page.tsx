@@ -1,11 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { connection } from "next/server";
 import { getTopics } from "@/lib/db";
+import { SkeletonTopics } from "@/components/skeletons";
 
-export default async function HomePage() {
-  await connection();
-  const { data: topics } = await getTopics();
-
+export default function HomePage() {
   return (
     <div>
       {/* Hero — one search box, no dropdowns. Filters arrive after results. */}
@@ -122,57 +121,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Plain-language browse */}
-      <section aria-labelledby="browse-heading">
-        <div className="mx-auto w-full max-w-6xl px-4 py-12">
-          <h2
-            id="browse-heading"
-            className="font-headline font-bold text-2xl sm:text-3xl text-brand-primary m-0"
-          >
-            Browse by what you need
-          </h2>
-          <p className="text-base mt-2 m-0">
-            No jargon — pick what sounds right and we&rsquo;ll show you what
-            matches.
-          </p>
-          {topics.length === 0 ? (
-            <p className="mt-6 text-text-body bg-surface rounded-lg p-5 m-0">
-              Topics will appear here once the directory data is loaded.{" "}
-              <Link
-                href="/resources"
-                className="text-brand-action font-semibold underline underline-offset-4"
-              >
-                Browse all resources
-              </Link>
-            </p>
-          ) : (
-            <ul className="list-none p-0 mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {topics.map((topic) => (
-                <li key={topic.slug}>
-                  <Link
-                    href={`/resources?topic=${topic.slug}`}
-                    className="block h-full bg-surface rounded-lg p-5 no-underline hover:bg-surface-raise hover:outline hover:outline-2 hover:outline-brand-action"
-                  >
-                    <h3 className="font-subhead font-bold text-lg text-brand-primary mt-0 mb-1">
-                      {topic.label}
-                    </h3>
-                    {topic.description && (
-                      <p className="text-base text-text-body m-0">
-                        {topic.description}
-                      </p>
-                    )}
-                    {topic.categories.length > 0 && (
-                      <p className="text-sm text-text-body/70 mt-2 m-0">
-                        Includes: {topic.categories.map((c) => c.name).join(", ")}
-                      </p>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
+      {/* Plain-language browse — streams in; the shell paints first */}
+      <Suspense fallback={<TopicsFallback />}>
+        <TopicsSection />
+      </Suspense>
 
       {/* Map placeholder — interactive map is a later phase */}
       <section aria-labelledby="map-heading" className="bg-surface">
@@ -205,5 +157,82 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+function TopicsFallback() {
+  return (
+    <section aria-busy="true">
+      <div className="mx-auto w-full max-w-6xl px-4 py-12">
+        <h2 className="font-headline font-bold text-2xl sm:text-3xl text-brand-primary m-0">
+          Browse by what you need
+        </h2>
+        <p className="text-base mt-2 m-0">
+          No jargon — pick what sounds right and we&rsquo;ll show you what
+          matches.
+        </p>
+        <div className="mt-6">
+          <SkeletonTopics />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+async function TopicsSection() {
+  await connection();
+  const { data: topics } = await getTopics();
+
+  return (
+    <section aria-labelledby="browse-heading">
+      <div className="mx-auto w-full max-w-6xl px-4 py-12">
+        <h2
+          id="browse-heading"
+          className="font-headline font-bold text-2xl sm:text-3xl text-brand-primary m-0"
+        >
+          Browse by what you need
+        </h2>
+        <p className="text-base mt-2 m-0">
+          No jargon — pick what sounds right and we&rsquo;ll show you what
+          matches.
+        </p>
+        {topics.length === 0 ? (
+          <p className="mt-6 text-text-body bg-surface rounded-lg p-5 m-0">
+            Topics will appear here once the directory data is loaded.{" "}
+            <Link
+              href="/resources"
+              className="text-brand-action font-semibold underline underline-offset-4"
+            >
+              Browse all resources
+            </Link>
+          </p>
+        ) : (
+          <ul className="list-none p-0 mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {topics.map((topic) => (
+              <li key={topic.slug}>
+                <Link
+                  href={`/resources?topic=${topic.slug}`}
+                  className="block h-full bg-surface rounded-lg p-5 no-underline hover:bg-surface-raise hover:outline hover:outline-2 hover:outline-brand-action"
+                >
+                  <h3 className="font-subhead font-bold text-lg text-brand-primary mt-0 mb-1">
+                    {topic.label}
+                  </h3>
+                  {topic.description && (
+                    <p className="text-base text-text-body m-0">
+                      {topic.description}
+                    </p>
+                  )}
+                  {topic.categories.length > 0 && (
+                    <p className="text-sm text-text-body/70 mt-2 m-0">
+                      Includes: {topic.categories.map((c) => c.name).join(", ")}
+                    </p>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }

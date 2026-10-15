@@ -9,6 +9,8 @@ import {
   telHref,
   weekdayLabel,
 } from "@/lib/format";
+import { Suspense } from "react";
+import { SkeletonDetail } from "@/components/skeletons";
 import { CorrectionForm } from "./correction-form";
 
 export async function generateMetadata({
@@ -24,9 +26,21 @@ export async function generateMetadata({
   };
 }
 
-export default async function ResourceDetailPage({
+export default function ResourceDetailPage({
   params,
 }: PageProps<"/resources/[slug]">) {
+  return (
+    <Suspense fallback={<SkeletonDetail />}>
+      <ResourceDetail params={params} />
+    </Suspense>
+  );
+}
+
+async function ResourceDetail({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   await connection();
   const { slug } = await params;
   const resource = await getResourceBySlug(slug);
