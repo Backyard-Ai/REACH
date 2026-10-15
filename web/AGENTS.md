@@ -47,3 +47,50 @@ until a partner actually asks. Don't build the roles now.
   Directus introspection dies on geometry_columns/geography_columns.
 - directus_* tables are owned by the directus role: schema surgery on
   them (drops, column fixes) must run connected AS directus.
+
+## Ops runbook: bulk data loads over the flaky link (2026-10-14)
+
+The importer (`web/scripts/import-master.ts`) is correct but cannot run
+directly against production from this network: one transaction, ~2,500
+sequential round-trips, 20+ minutes — the long-haul link resets before it
+commits. It rolls back cleanly; retries just repeat the gamble. The working
+pattern (used for the production import of 2026-10-14):
+
+1. Run the importer against the local throwaway container
+   (`TARGET_DATABASE_URL=postgres://postgres:…@localhost:<port>/postgres`).
+   Local runs finish in seconds and produce the identical validated state.
+2. `pg_dump --inserts --no-owner --no-privileges --data-only -t <tables>`
+   from the container. Strip lines starting with `\` — pg_dump 17 emits
+   `\restrict` psql meta-commands that break non-psql drivers.
+3. Transform the dump: append `ON CONFLICT DO NOTHING` to every INSERT,
+   and add `OVERRIDING SYSTEM VALUE` to INSERTs that carry an `id` column
+   (schema v1.3.1 identity columns are GENERATED ALWAYS and reject
+   explicit ids without it).
+4. Restore to production as one small transaction PER TABLE, in
+   dependency order, each retried with a fresh client:
+   wipe + region shim → lookups → locations → organisations + links +
+   contacts + service_areas → meetings → **import_runs BEFORE
+   source_records** (FK on last_seen_run_id) → finalize (region remap,
+   sequence setvals, delete shim).
+   - The shim: container and production have different region ids
+     (container 1, production 3). Insert a temporary region row with the
+     container's id and a throwaway slug so inserts pass FK checks, remap
+     `region_id` in the finalize phase, then delete the shim — one
+     transaction boundaries be damned, it is all inside phases.
+   - Never wipe or restore: regions, crisis_lines, submissions — outside
+     the importer's domain and live only in production.
+5. Sequences: after restore, `setval(pg_get_serial_sequence(...), max(id))`
+   for every table with an identity column, or the next insert collides.
+6. Re-run the verification battery (orgs/locations/series/schedules/
+   contacts/service_areas/source_records/import_runs/published_resources)
+   — it must match the container exactly; the transform is deterministic.
+
+Gotchas recorded for posterity: zsh does not word-split unquoted variables
+(`${=VAR}` or die confusing deaths); pg_dump arg lists built in loops must
+run inside the container's shell; a tool-killed restore process can linger
+holding transaction locks — check `pg_stat_activity` without an
+application_name filter and terminate before retrying.
+
+Production bookkeeping honesty: import_runs on production is the container
+run that produced the loaded state (added=318, unchanged=0), stamped as
+run 1; subsequent monthly refreshes diff against it normally.
