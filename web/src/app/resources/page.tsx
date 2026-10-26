@@ -3,7 +3,9 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { getCountiesInRegion, getTopics, searchResources } from "@/lib/db";
 import { ResourceCard } from "@/components/resource-card";
-import { SkeletonFilters, SkeletonResults } from "@/components/skeletons";
+import { SkeletonFilters, SkeletonMap, SkeletonResults } from "@/components/skeletons";
+import { ResourceMap } from "@/components/resource-map";
+import { toMapPoints } from "@/lib/map-points";
 
 export const metadata = {
   title: "Find Resources",
@@ -16,6 +18,16 @@ function firstParam(value: string | string[] | undefined): string {
   return value ?? "";
 }
 
+function viewLink(q: string, topic: string, county: string, view: "list" | "map") {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (topic) params.set("topic", topic);
+  if (county) params.set("county", county);
+  if (view === "map") params.set("view", "map");
+  const qs = params.toString();
+  return qs ? `/resources?${qs}` : "/resources";
+}
+
 export default async function ResourcesPage({
   searchParams,
 }: PageProps<"/resources">) {
@@ -23,6 +35,7 @@ export default async function ResourcesPage({
   const q = firstParam(sp.q).trim();
   const topic = firstParam(sp.topic).trim();
   const county = firstParam(sp.county).trim();
+  const view = firstParam(sp.view) === "map" ? "map" : "list";
 
   return (
     <div>
@@ -45,8 +58,8 @@ export default async function ResourcesPage({
           <FilterForm q={q} topic={topic} county={county} />
         </Suspense>
 
-        <Suspense key={`${q}|${topic}|${county}`} fallback={<SkeletonResults />}>
-          <Results q={q} topic={topic} county={county} />
+        <Suspense key={`${q}|${topic}|${county}|${view}`} fallback={view === "map" ? <SkeletonMap /> : <SkeletonResults />}>
+          <Results q={q} topic={topic} county={county} view={view} />
         </Suspense>
       </div>
     </div>
@@ -158,10 +171,12 @@ async function Results({
   q,
   topic,
   county,
+  view,
 }: {
   q: string;
   topic: string;
   county: string;
+  view: "list" | "map";
 }) {
   await connection();
   const [{ data: topics }, { data: resources, dbError }] = await Promise.all([
@@ -170,8 +185,39 @@ async function Results({
   ]);
   const activeTopic = topics.find((t) => t.slug === topic);
 
+  const points = toMapPoints(resources);
+  const coverageOnly = resources.filter(
+    (r) => r.locations.length === 0 && r.county_coverage.length > 0,
+  );
+
   return (
     <div className="mt-6">
+      <nav aria-label="Result view" className="mb-4">
+        <ul className="list-none p-0 m-0 inline-flex rounded-full border border-[#C9C9CE] overflow-hidden">
+          <li>
+            <a
+              href={viewLink(q, topic, county, "list")}
+              aria-current={view === "list" ? "true" : undefined}
+              className={view === "list"
+                ? "flex items-center min-h-11 px-5 bg-brand-primary text-white text-base font-semibold no-underline"
+                : "flex items-center min-h-11 px-5 bg-surface-raise text-text-body text-base no-underline hover:text-brand-primary"}
+            >
+              List
+            </a>
+          </li>
+          <li>
+            <a
+              href={viewLink(q, topic, county, "map")}
+              aria-current={view === "map" ? "true" : undefined}
+              className={view === "map"
+                ? "flex items-center min-h-11 px-5 bg-brand-primary text-white text-base font-semibold no-underline"
+                : "flex items-center min-h-11 px-5 bg-surface-raise text-text-body text-base no-underline hover:text-brand-primary"}
+            >
+              Map
+            </a>
+          </li>
+        </ul>
+      </nav>
       <p className="text-base text-text-body" role="status">
         {dbError
           ? "The directory is temporarily unavailable — please try again shortly."
@@ -183,7 +229,46 @@ async function Results({
         {q && ` matching “${q}”`}
       </p>
 
-      {resources.length === 0 && !dbError ? (
+      {view === "map" ? (
+        <div>
+          {coverageOnly.length > 0 && (
+            <div className="mb-4 rounded-md border-l-4 border-brand-accent bg-surface px-4 py-3">
+              <p className="m-0 text-sm font-semibold text-brand-primary">
+                Serving your whole county — no walk-in address to map
+              </p>
+              <ul className="list-none p-0 m-0 mt-1">
+                {coverageOnly.map((r) => (
+                  <li key={r.slug} className="text-sm">
+                    <a
+                      href={`/resources/${r.slug}`}
+                      className="text-brand-action font-semibold underline underline-offset-2"
+                    >
+                      {r.name}
+                    </a>
+                    {" — "}
+                    {r.county_coverage.map((c) => c.county).join(", ")}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <ResourceMap points={points} />
+          {/* The map's screen-reader equivalent: every mapped result as a
+              real list with real links (WCAG — the map is never the only
+              way to reach a result). */}
+          <ul className="sr-only">
+            {resources.map((r) => (
+              <li key={r.slug}>
+                <a href={`/resources/${r.slug}`}>{r.name}</a>
+                {r.locations[0]?.city ? ` — ${r.locations[0].city}` : ""}
+                {r.locations.length === 0 && r.county_coverage.length > 0
+                  ? " — serves " + r.county_coverage.map((c) => c.county).join(", ") + " County"
+                  : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : resources.length === 0 && !dbError ? (
         <div className="mt-4 bg-surface rounded-lg p-6">
           <p className="mt-0">
             Nothing matched{q ? ` “${q}”` : " those filters"}. Misspellings

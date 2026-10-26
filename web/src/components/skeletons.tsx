@@ -99,3 +99,15 @@ export function SkeletonMeetings({ count = 6 }: { count?: number }) {
     </div>
   );
 }
+
+export function SkeletonMap({
+  className = "h-[70vh] min-h-[420px] w-full",
+}: {
+  className?: string;
+}) {
+  return (
+    <div aria-hidden="true">
+      <Pulse className={`${className} rounded-lg border border-surface`} />
+    </div>
+  );
+}

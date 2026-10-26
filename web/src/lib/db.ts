@@ -300,6 +300,47 @@ export async function getResourceBySlug(
 }
 
 // ---------------------------------------------------------------------------
+// Map points — lean projection of published_resources (slug, name, locations).
+// ---------------------------------------------------------------------------
+
+const mapPointRowSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  locations: z.array(locationSchema),
+});
+
+export async function getMapPoints(): Promise<
+  Fallback<{ slug: string; name: string; city: string | null; lat: number; lng: number }[]>
+> {
+  try {
+    const { data, error } = await db()
+      .from("published_resources")
+      .select("slug,name,locations");
+    if (error) throw error;
+    const parsed = z.array(mapPointRowSchema).safeParse(data ?? []);
+    if (!parsed.success) {
+      warn("getMapPoints", parsed.error.issues.slice(0, 5));
+      return { data: [], dbError: true };
+    }
+    const points = parsed.data.flatMap((r) =>
+      r.locations
+        .filter((l) => l.lat !== null && l.lng !== null)
+        .map((l) => ({
+          slug: r.slug,
+          name: r.name,
+          city: l.city,
+          lat: l.lat as number,
+          lng: l.lng as number,
+        })),
+    );
+    return { data: points, dbError: false };
+  } catch (e) {
+    warn("getMapPoints", e);
+    return { data: [], dbError: true };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Meetings — read through the published_meetings view only.
 // ---------------------------------------------------------------------------
 

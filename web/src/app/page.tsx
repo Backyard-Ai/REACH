@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { getTopics } from "@/lib/db";
-import { SkeletonTopics } from "@/components/skeletons";
+import { getMapPoints, getTopics } from "@/lib/db";
+import { SkeletonMap, SkeletonTopics } from "@/components/skeletons";
+import { ResourceMap } from "@/components/resource-map";
 
 export default function HomePage() {
   return (
@@ -126,37 +127,69 @@ export default function HomePage() {
         <TopicsSection />
       </Suspense>
 
-      {/* Map placeholder — interactive map is a later phase */}
-      <section aria-labelledby="map-heading" className="bg-surface">
-        <div className="mx-auto w-full max-w-6xl px-4 py-12">
-          <h2
-            id="map-heading"
-            className="font-headline font-bold text-2xl sm:text-3xl text-brand-primary m-0"
-          >
-            Map view
-          </h2>
-          <div
-            role="img"
-            aria-label="Placeholder for the upcoming interactive map of resources across the ten counties"
-            className="mt-6 rounded-lg border-2 border-dashed border-brand-accent bg-surface-raise px-6 py-12 text-center"
-          >
-            <p className="font-subhead italic text-lg text-text-body mt-0 mb-2">
-              An interactive map is on the way.
-            </p>
-            <p className="text-base text-text-body m-0">
-              Until then, every resource is in the list — including services
-              that cover your whole county without a walk-in address.{" "}
-              <Link
-                href="/resources"
-                className="text-brand-action font-semibold underline underline-offset-4"
-              >
-                Browse the full list
-              </Link>
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Live map preview — full filterable map lives on /resources */}
+      <Suspense fallback={<MapPreviewFallback />}>
+        <MapPreviewSection />
+      </Suspense>
     </div>
+  );
+}
+
+function MapPreviewFallback() {
+  return (
+    <section aria-labelledby="map-heading" className="bg-surface" aria-busy="true">
+      <div className="mx-auto w-full max-w-6xl px-4 py-12">
+        <h2
+          id="map-heading"
+          className="font-headline font-bold text-2xl sm:text-3xl text-brand-primary m-0"
+        >
+          Map view
+        </h2>
+        <div className="mt-6">
+          <SkeletonMap className="h-[420px] sm:h-[480px] w-full" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+async function MapPreviewSection() {
+  await connection();
+  const { data: points } = await getMapPoints();
+  return (
+    <section aria-labelledby="map-heading" className="bg-surface">
+      <div className="mx-auto w-full max-w-6xl px-4 py-12">
+        <h2
+          id="map-heading"
+          className="font-headline font-bold text-2xl sm:text-3xl text-brand-primary m-0"
+        >
+          Map view
+        </h2>
+        <p className="text-base mt-2 mb-0">
+          Every listing with an address is here — clustering keeps it readable,
+          and services that cover your county without a walk-in address stay
+          listed above the full map.{" "}
+          <Link
+            href="/resources?view=map"
+            className="text-brand-action font-semibold underline underline-offset-4"
+          >
+            Open the map with filters
+          </Link>
+        </p>
+        <div className="mt-6">
+          <ResourceMap points={points} heightClass="h-[420px] sm:h-[480px]" />
+        </div>
+        {/* Screen-reader equivalent of the preview map */}
+        <ul className="sr-only" aria-label="Mapped resources">
+          {points.map((p) => (
+            <li key={`${p.slug}-${p.lat}`}>
+              <a href={`/resources/${p.slug}`}>{p.name}</a>
+              {p.city ? ` — ${p.city}` : ""}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 

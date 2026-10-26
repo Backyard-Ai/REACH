@@ -81,3 +81,33 @@ summary:focus-visible {
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
 }
+
+/* MapLibre popup, brand-tuned */
+.reach-map-popup .maplibregl-popup-content {
+  font-family: var(--font-sans);
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: grid;
+  gap: 2px;
+  box-shadow: 0 4px 14px rgb(43 43 51 / 0.18);
+}
+.reach-popup-name {
+  color: var(--brand-primary);
+  font-weight: 700;
+  font-size: 15px;
+}
+.reach-popup-city {
+  color: var(--text-body);
+  font-size: 13px;
+}
+.reach-popup-link {
+  color: var(--brand-action);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: 4px;
+}
+.reach-map-popup .maplibregl-popup-tip {
+  border-top-color: #fff;
+}
