@@ -94,3 +94,13 @@ application_name filter and terminate before retrying.
 Production bookkeeping honesty: import_runs on production is the container
 run that produced the loaded state (added=318, unchanged=0), stamped as
 run 1; subsequent monthly refreshes diff against it normally.
+
+## Inspect instance (8057) recovery
+
+Recreating `reach_import_validation` breaks the Directus inspect instance
+two ways: the new container isn't on the `reach-inspect` network, and its
+fresh database has no directus_* tables. Recovery:
+`docker network connect reach-inspect reach_import_validation && docker restart reach_directus_inspect`,
+wait for ping, then re-run the polish pass (icons/notes/hidden PATCH —
+see the script history in this file's sibling commits; auto-adopt handles
+collections, not polish).
