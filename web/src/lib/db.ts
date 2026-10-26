@@ -300,6 +300,91 @@ export async function getResourceBySlug(
 }
 
 // ---------------------------------------------------------------------------
+// Meetings — read through the published_meetings view only.
+// ---------------------------------------------------------------------------
+
+export const meetingSchema = z.object({
+  id: z.number().int(),
+  region_id: z.number().int(),
+  slug: z.string(),
+  meeting_name: z.string(),
+  fellowship: z.string().nullable(),
+  room: z.string().nullable(),
+  organisation_slug: z.string(),
+  organisation_name: z.string(),
+  address_line1: z.string().nullable(),
+  city: z.string().nullable(),
+  state_code: z.string().nullable(),
+  postal_code: z.string().nullable(),
+  lat: z.number().nullable(),
+  lng: z.number().nullable(),
+  type_codes: z.array(z.string()),
+  schedule: z.array(scheduleEntrySchema),
+});
+
+export type Meeting = z.infer<typeof meetingSchema>;
+
+export async function getMeetingFellowships(): Promise<string[]> {
+  try {
+    const { data, error } = await db()
+      .from("published_meetings")
+      .select("fellowship")
+      .order("fellowship");
+    if (error) throw error;
+    return [...new Set((data ?? []).map((r: { fellowship: string | null }) => r.fellowship).filter((f): f is string => f !== null))];
+  } catch (e) {
+    warn("getMeetingFellowships", e);
+    return [];
+  }
+}
+
+export async function getMeetingTypeLabels(): Promise<Record<string, string>> {
+  try {
+    const { data, error } = await db()
+      .from("meeting_types")
+      .select("code, label")
+      .eq("is_active", true);
+    if (error) throw error;
+    return Object.fromEntries((data ?? []).map((r: { code: string; label: string }) => [r.code, r.label]));
+  } catch (e) {
+    warn("getMeetingTypeLabels", e);
+    return {};
+  }
+}
+
+export type MeetingFilter = { day?: string; fellowship?: string };
+
+export async function getPublishedMeetings(
+  filter: MeetingFilter,
+): Promise<Fallback<Meeting[]>> {
+  try {
+    let query = db()
+      .from("published_meetings")
+      .select("*")
+      .order("meeting_name");
+    // day filtering runs inside Postgres via jsonb containment on the
+    // view's schedule column — the dataset never leaves the server whole.
+    if (filter.day && filter.day !== "all") {
+      query = query.contains("schedule", [{ day: filter.day }]);
+    }
+    if (filter.fellowship) {
+      query = query.eq("fellowship", filter.fellowship);
+    }
+    const { data, error } = await query;
+    if (error) throw error;
+    const parsed = z.array(meetingSchema).safeParse(data ?? []);
+    if (!parsed.success) {
+      warn("getPublishedMeetings", parsed.error.issues.slice(0, 5));
+      return { data: [], dbError: true };
+    }
+    return { data: parsed.data, dbError: false };
+  } catch (e) {
+    warn("getPublishedMeetings", e);
+    return { data: [], dbError: true };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Submissions — inserted ONLY by the server route (src/app/api/submissions)
 // via the service-role client, with Turnstile and rate limiting applied
 // there. The anonymous INSERT policy was removed in the v1.4 migration;

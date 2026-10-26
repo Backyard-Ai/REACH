@@ -54,3 +54,25 @@ export function directionsUrl(parts: {
     .join(", ");
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
 }
+
+/** [1,3,5] -> "1st, 3rd & 5th" (weeks-of-month pattern, null = every week). */
+export function weeksLabel(weeks: number[] | null): string | null {
+  if (!weeks || weeks.length === 0) return null;
+  const ord = (n: number) => {
+    const suffix = n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
+    return `${n}${suffix}`;
+  };
+  const parts = weeks.map(ord);
+  if (parts.length === 1) return parts[0];
+  return parts.slice(0, -1).join(", ") + " & " + parts[parts.length - 1];
+}
+
+/** Today's weekday in the directory's timezone (venues are local time). */
+export function todayWeekday(): string {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    timeZone: "America/New_York",
+  })
+    .format(new Date())
+    .toLowerCase();
+}

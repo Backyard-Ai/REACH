@@ -82,3 +82,20 @@ export function SkeletonDetail() {
     </div>
   );
 }
+
+export function SkeletonMeetings({ count = 6 }: { count?: number }) {
+  return (
+    <div>
+      <Pulse className="h-6 w-56 mb-4" />
+      <ul className="list-none p-0 grid gap-3" aria-hidden="true">
+        {Array.from({ length: count }, (_, i) => (
+          <li key={i} className="bg-surface-raise rounded-lg border border-surface p-4">
+            <Pulse className="h-6 w-2/3 mb-2" />
+            <Pulse className="h-4 w-40 mb-3" />
+            <Pulse className="h-4 w-56" />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
