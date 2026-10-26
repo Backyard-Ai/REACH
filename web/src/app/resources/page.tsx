@@ -55,7 +55,7 @@ export default async function ResourcesPage({
         {/* The shell paints instantly; filters and results stream in as
             their queries resolve — the difference shows on slow links. */}
         <Suspense fallback={<SkeletonFilters />}>
-          <FilterForm q={q} topic={topic} county={county} />
+          <FilterForm q={q} topic={topic} county={county} view={view} />
         </Suspense>
 
         <Suspense key={`${q}|${topic}|${county}|${view}`} fallback={view === "map" ? <SkeletonMap /> : <SkeletonResults />}>
@@ -70,10 +70,12 @@ async function FilterForm({
   q,
   topic,
   county,
+  view,
 }: {
   q: string;
   topic: string;
   county: string;
+  view: "list" | "map";
 }) {
   await connection();
   const [{ data: topics }, { data: counties }] = await Promise.all([
@@ -88,6 +90,8 @@ async function FilterForm({
         method="get"
         className="bg-surface rounded-lg p-4 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto] sm:items-end"
       >
+        {/* GET forms drop params they don't contain — keep the view */}
+        {view === "map" && <input type="hidden" name="view" value="map" />}
         <div>
           <label
             htmlFor="filter-q"
@@ -156,7 +160,7 @@ async function FilterForm({
       {(q || topic || county) && (
         <p className="mt-2 text-base">
           <Link
-            href="/resources"
+            href={viewLink("", "", "", view)}
             className="text-brand-action font-semibold underline underline-offset-4"
           >
             Clear all filters
