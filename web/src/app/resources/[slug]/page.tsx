@@ -11,6 +11,7 @@ import {
 } from "@/lib/format";
 import { Suspense } from "react";
 import { SkeletonDetail } from "@/components/skeletons";
+import { ResourceMap } from "@/components/resource-map";
 import { CorrectionForm } from "./correction-form";
 
 export async function generateMetadata({
@@ -193,6 +194,25 @@ async function ResourceDetail({
             </ul>
           )}
         </section>
+
+        {resource.locations.some((l) => l.lat !== null && l.lng !== null) && (
+          <section aria-label="Map of this resource">
+            <div className="rounded-lg">
+              <ResourceMap
+                points={resource.locations
+                  .filter((l) => l.lat !== null && l.lng !== null)
+                  .map((l) => ({
+                    slug: resource.slug,
+                    name: resource.name,
+                    city: l.city,
+                    lat: l.lat as number,
+                    lng: l.lng as number,
+                  }))}
+                heightClass="h-[320px] sm:h-[380px]"
+              />
+            </div>
+          </section>
+        )}
 
         <section aria-labelledby="hours-heading">
           <h2
