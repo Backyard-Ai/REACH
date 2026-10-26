@@ -198,6 +198,7 @@ export function CorrectionForm({
           id="correction-email"
           name="submitterEmail"
           type="email"
+          autoComplete="email"
           className="w-full min-h-11 px-3 rounded-md text-base text-text-body bg-surface-raise border border-[#C9C9CE] focus:border-brand-action"
         />
       </div>

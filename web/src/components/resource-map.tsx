@@ -291,6 +291,7 @@ export function ResourceMap({
           ref={containerRef}
           role="application"
           aria-label="Interactive map of resource locations. Select a pin to show its details beside the map; a screen-reader-friendly list of the same results is available."
+          tabIndex={0}
           className={`${heightClass} w-full rounded-lg border border-[#C9C9CE] overflow-hidden bg-surface`}
         />
       </div>
