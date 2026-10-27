@@ -53,7 +53,7 @@ export default function AboutPage() {
             Start with the directory instead:{" "}
             <Link
               href="/resources"
-              className="text-brand-action font-semibold underline underline-offset-4"
+              className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
             >
               find resources
             </Link>

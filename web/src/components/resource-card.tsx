@@ -14,7 +14,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
         <h2 className="font-subhead font-bold text-xl mt-0 mb-1">
           <Link
             href={`/resources/${resource.slug}`}
-            className="text-brand-primary underline decoration-brand-accent decoration-2 underline-offset-4 hover:text-brand-action hover:decoration-4"
+            className="text-brand-action no-underline hover:underline hover:underline-offset-4 hover:text-brand-action-hover"
           >
             {resource.name}
           </Link>
@@ -59,7 +59,7 @@ export function ResourceCard({ resource }: { resource: Resource }) {
           <p className="mt-3 mb-0">
             <a
               href={telHref(resource.public_phone)}
-              className="inline-flex items-center min-h-11 text-brand-action font-semibold underline decoration-2 underline-offset-4 hover:text-brand-action-hover"
+              className="inline-flex items-center min-h-11 text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4 hover:text-brand-action-hover"
             >
               Call {resource.public_phone}
             </a>

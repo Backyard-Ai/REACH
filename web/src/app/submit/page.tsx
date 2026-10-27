@@ -33,7 +33,7 @@ export default function SubmitPage() {
         <p className="m-0">
           <Link
             href="/resources"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             Browse resources
           </Link>

@@ -101,7 +101,7 @@ export default async function MeetingsPage({
           Looking for ongoing support rather than a meeting time?{" "}
           <Link
             href="/resources"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             Browse all resources
           </Link>
@@ -176,7 +176,7 @@ async function MeetingList({
             {fellowship ? ` for ${fellowship}` : ""}. Try another day — or{" "}
             <Link
               href={link("all", "")}
-              className="text-brand-action font-semibold underline underline-offset-4"
+              className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
             >
               show the whole week
             </Link>

@@ -164,7 +164,7 @@ async function ProFilters({
         <p className="mt-2 text-base">
           <Link
             href="/professionals"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             Clear all filters
           </Link>
@@ -216,7 +216,7 @@ async function ProResults({
           </p>
           <Link
             href="/professionals"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             Show everything
           </Link>

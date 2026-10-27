@@ -36,7 +36,7 @@ async function CrisisBand() {
           Call or text{" "}
           <a
             href={telHref(primary.phone)}
-            className="text-white font-bold underline decoration-brand-accent decoration-2 underline-offset-4 hover:decoration-4"
+            className="text-white font-bold no-underline hover:underline hover:decoration-brand-accent hover:decoration-2 hover:underline-offset-4"
           >
             {primary.label} {primary.phone}
           </a>{" "}

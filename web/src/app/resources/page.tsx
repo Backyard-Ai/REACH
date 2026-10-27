@@ -161,7 +161,7 @@ async function FilterForm({
         <p className="mt-2 text-base">
           <Link
             href={viewLink("", "", "", view)}
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             Clear all filters
           </Link>
@@ -245,7 +245,7 @@ async function Results({
                   <li key={r.slug} className="text-sm">
                     <a
                       href={`/resources/${r.slug}`}
-                      className="text-brand-action font-semibold underline underline-offset-2"
+                      className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-2"
                     >
                       {r.name}
                     </a>
@@ -281,7 +281,7 @@ async function Results({
           <p className="mb-0">
             <Link
               href="/resources"
-              className="text-brand-action font-semibold underline underline-offset-4"
+              className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
             >
               Show everything
             </Link>

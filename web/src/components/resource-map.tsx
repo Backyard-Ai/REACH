@@ -341,7 +341,7 @@ export function ResourceMap({
                 Details couldn&rsquo;t load right now —{" "}
                 <a
                   href={`/resources/${encodeURIComponent(selected.slug)}`}
-                  className="text-brand-action font-semibold underline underline-offset-2"
+                  className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-2"
                 >
                   open the full page
                 </a>
@@ -375,7 +375,7 @@ export function ResourceMap({
                   {details.publicPhone && (
                     <a
                       href={telHref(details.publicPhone)}
-                      className="text-brand-action font-semibold underline underline-offset-2"
+                      className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-2"
                     >
                       Call {details.publicPhone}
                     </a>
@@ -385,7 +385,7 @@ export function ResourceMap({
                       href={details.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-brand-action font-semibold underline underline-offset-2"
+                      className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-2"
                     >
                       Visit website
                       <span className="sr-only"> (opens in a new tab)</span>

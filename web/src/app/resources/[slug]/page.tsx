@@ -115,7 +115,7 @@ async function ResourceDetail({
               <p className="m-0">
                 <a
                   href={telHref(resource.public_phone)}
-                  className="inline-flex items-center min-h-11 text-brand-action font-bold text-xl underline decoration-2 underline-offset-4 hover:text-brand-action-hover"
+                  className="inline-flex items-center min-h-11 text-brand-action font-bold text-xl no-underline hover:underline hover:underline-offset-4 hover:text-brand-action-hover"
                 >
                   Call {resource.public_phone}
                 </a>
@@ -125,7 +125,7 @@ async function ResourceDetail({
               <p className="m-0">
                 <a
                   href={`mailto:${resource.public_email}`}
-                  className="inline-flex items-center min-h-11 text-brand-action font-semibold underline underline-offset-4 hover:text-brand-action-hover"
+                  className="inline-flex items-center min-h-11 text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4 hover:text-brand-action-hover"
                 >
                   {resource.public_email}
                 </a>
@@ -137,7 +137,7 @@ async function ResourceDetail({
                   href={resource.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center min-h-11 text-brand-action font-semibold underline underline-offset-4 hover:text-brand-action-hover"
+                  className="inline-flex items-center min-h-11 text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4 hover:text-brand-action-hover"
                 >
                   Visit website
                   <span className="sr-only"> (opens in a new tab)</span>
@@ -162,7 +162,7 @@ async function ResourceDetail({
           {resource.locations.length === 0 ? (
             <p className="bg-surface rounded-lg p-5 m-0">
               This service has no walk-in address — it comes to your county.
-              See <a href="#counties-served" className="text-brand-action font-semibold underline underline-offset-4">counties served</a> below.
+              See <a href="#counties-served" className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4">counties served</a> below.
             </p>
           ) : (
             <ul className="list-none p-0 grid gap-3">
@@ -180,7 +180,7 @@ async function ResourceDetail({
                     href={directionsUrl(location)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center min-h-11 mt-2 text-brand-action font-semibold underline underline-offset-4 hover:text-brand-action-hover"
+                    className="inline-flex items-center min-h-11 mt-2 text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4 hover:text-brand-action-hover"
                   >
                     Get directions
                     <span className="sr-only">
@@ -280,7 +280,7 @@ async function ResourceDetail({
                   {coverage.phone && (
                     <a
                       href={telHref(coverage.phone)}
-                      className="text-brand-action font-semibold underline underline-offset-4 hover:text-brand-action-hover"
+                      className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4 hover:text-brand-action-hover"
                     >
                       {coverage.phone}
                     </a>

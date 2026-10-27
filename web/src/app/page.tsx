@@ -43,7 +43,7 @@ export default function HomePage() {
             In crisis right now?{" "}
             <Link
               href="/get-help"
-              className="text-white font-bold underline decoration-brand-accent decoration-2 underline-offset-4"
+              className="text-white font-bold no-underline hover:underline hover:decoration-brand-accent hover:decoration-2 hover:underline-offset-4"
             >
               Get help now
             </Link>
@@ -171,7 +171,7 @@ async function MapPreviewSection() {
           listed above the full map.{" "}
           <Link
             href="/resources?view=map"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             Open the map with filters
           </Link>
@@ -234,7 +234,7 @@ async function TopicsSection() {
             Topics will appear here once the directory data is loaded.{" "}
             <Link
               href="/resources"
-              className="text-brand-action font-semibold underline underline-offset-4"
+              className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
             >
               Browse all resources
             </Link>

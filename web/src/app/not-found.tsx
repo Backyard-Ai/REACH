@@ -44,21 +44,21 @@ export default function NotFound() {
           Or{" "}
           <Link
             href="/resources"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             browse all resources
           </Link>
           {" · "}
           <Link
             href="/meetings"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             find a meeting
           </Link>
           {" · "}
           <Link
             href="/"
-            className="text-brand-action font-semibold underline underline-offset-4"
+            className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             go to the home page
           </Link>
@@ -68,7 +68,7 @@ export default function NotFound() {
           In crisis right now?{" "}
           <Link
             href="/get-help"
-            className="text-crisis font-bold underline underline-offset-4"
+            className="text-crisis font-bold no-underline hover:underline hover:underline-offset-4"
           >
             Get help now — crisis lines that answer 24/7
           </Link>
