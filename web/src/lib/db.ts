@@ -257,6 +257,7 @@ export type SearchParams = {
   q?: string;
   topic?: string;
   county?: string;
+  category?: string;
 };
 
 export async function searchResources(
@@ -267,6 +268,7 @@ export async function searchResources(
       q: params.q?.trim() ?? "",
       topic: params.topic || null,
       county: params.county || null,
+      category: params.category || null,
     });
     if (error) throw error;
     return { data: parseResources(data), dbError: false };
@@ -296,6 +298,32 @@ export async function getResourceBySlug(
   } catch (e) {
     warn("getResourceBySlug", e);
     return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Professional taxonomy (the 14 categories, for the For Professionals page)
+// ---------------------------------------------------------------------------
+
+export type Category = { id: number; slug: string; name: string; description: string | null };
+
+export async function getCategories(): Promise<Fallback<Category[]>> {
+  try {
+    const { data, error } = await db()
+      .from("categories")
+      .select("id, slug, name, definition")
+      .eq("is_active", true)
+      .order("sort_order");
+    if (error) throw error;
+    return {
+      data: (data ?? []).map((r: { id: number; slug: string; name: string; definition: string | null }) => ({
+        id: r.id, slug: r.slug, name: r.name, description: r.definition,
+      })),
+      dbError: false,
+    };
+  } catch (e) {
+    warn("getCategories", e);
+    return { data: [], dbError: true };
   }
 }
 

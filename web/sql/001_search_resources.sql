@@ -21,7 +21,8 @@
 --   * fuzzy      — word_similarity > 0.45 (misspellings, pg_trgm)
 --   * synonyms   — exact synonym term → its category or topic
 -- Filters:
---   * topic  — plain-language topic slug through topic_categories
+--   * topic    — plain-language topic slug through topic_categories
+--   * category — professional taxonomy name (e.g. 'Treatment Services')
 --   * county — county name through service_areas ONLY. Deliberate:
 --              the trial/production import (import_trial.py, the
 --              organisation_locations loop) writes a service_areas row
@@ -46,9 +47,10 @@
 -- =====================================================================
 
 CREATE OR REPLACE FUNCTION public.search_resources(
-    q      text DEFAULT '',
-    topic  text DEFAULT NULL,
-    county text DEFAULT NULL
+    q        text DEFAULT '',
+    topic    text DEFAULT NULL,
+    county   text DEFAULT NULL,
+    category text DEFAULT NULL
 )
 RETURNS SETOF public.published_resources
 LANGUAGE sql
@@ -126,6 +128,18 @@ AS $$
             )
     )
     AND (
+            category IS NULL OR trim(category) = ''
+        OR  EXISTS (
+                SELECT 1
+                FROM public.organisation_categories oc3
+                JOIN public.categories c3
+                  ON c3.id = oc3.category_id
+                 AND c3.is_active
+                WHERE oc3.organisation_id = pr.id
+                  AND c3.name = category
+            )
+    )
+    AND (
             county IS NULL OR trim(county) = ''
         OR  EXISTS (
                 SELECT 1
@@ -152,5 +166,5 @@ AS $$
         pr.id;
 $$;
 
-REVOKE ALL ON FUNCTION public.search_resources(text, text, text) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.search_resources(text, text, text) TO anon, authenticated;
+REVOKE ALL ON FUNCTION public.search_resources(text, text, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.search_resources(text, text, text, text) TO anon, authenticated;
