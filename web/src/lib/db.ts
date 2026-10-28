@@ -328,6 +328,33 @@ export async function getCategories(): Promise<Fallback<Category[]>> {
 }
 
 // ---------------------------------------------------------------------------
+// Attributes — the submission form's structured multi-select vocabulary.
+// ---------------------------------------------------------------------------
+
+export type Attribute = { id: number; kind: string; slug: string; label: string };
+export type AttributesByKind = Record<string, Attribute[]>;
+
+export async function getAttributesByKind(): Promise<Fallback<AttributesByKind>> {
+  try {
+    const { data, error } = await db()
+      .from("attributes")
+      .select("id, kind, slug, label")
+      .eq("is_active", true)
+      .order("kind")
+      .order("sort_order");
+    if (error) throw error;
+    const grouped: AttributesByKind = {};
+    for (const r of (data ?? []) as { id: number; kind: string; slug: string; label: string }[]) {
+      (grouped[r.kind] ??= []).push(r);
+    }
+    return { data: grouped, dbError: false };
+  } catch (e) {
+    warn("getAttributesByKind", e);
+    return { data: {}, dbError: true };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Map points — lean projection of published_resources (slug, name, locations).
 // ---------------------------------------------------------------------------
 

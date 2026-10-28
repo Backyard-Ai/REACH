@@ -22,15 +22,6 @@ function firstParam(value: string | string[] | undefined): string {
   return value ?? "";
 }
 
-function buildUrl(q: string, category: string, county: string): string {
-  const params = new URLSearchParams();
-  if (q) params.set("q", q);
-  if (category) params.set("category", category);
-  if (county) params.set("county", county);
-  const qs = params.toString();
-  return qs ? `/professionals?${qs}` : "/professionals";
-}
-
 export default async function ProfessionalsPage({
   searchParams,
 }: PageProps<"/professionals">) {
