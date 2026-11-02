@@ -122,10 +122,10 @@ function FooterMain() {
             Funding acknowledgment
           </h2>
           <p className="text-sm text-white/85 m-0">
-            {/* Placeholder — confirmed wording lands before launch */}
-            This project is supported by [funding acknowledgment
-            placeholder — East Tennessee State University and the
-            Tennessee Department of Health / TDMHSAS].
+            Northeast Tennessee REACH (Recovery Ecosystem &ndash; Access
+            to Care and Health) is an initiative of East Tennessee State
+            University. This project is funded by the Tennessee Opioid
+            Abatement Council.
           </p>
         </div>
       </div>
@@ -133,7 +133,16 @@ function FooterMain() {
         <p className="mx-auto w-full max-w-6xl px-4 py-3 text-sm text-white/85 m-0">
           Northeast Tennessee Reach · Listing information is reviewed by
           people, for people. Every listing page shows when it was last
-          verified.
+          verified. ·{" "}
+          <a
+            href="https://backyard-ai.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-accent no-underline hover:underline hover:underline-offset-2"
+          >
+            Created by Backyard-AI
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
         </p>
       </div>
     </div>
