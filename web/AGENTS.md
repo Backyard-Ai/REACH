@@ -1,3 +1,26 @@
+# ⚠️ HARD RULE — READ BEFORE DOING ANYTHING ⚠️
+
+## NEVER COMMIT OR PUSH WITHOUT EXPLICIT USER APPROVAL
+
+**The user must see the diff and say "commit" or "commit and push" first.**
+No exceptions. No assumptions. No "they approved this pattern before."
+Every commit, every push, every time — show the diff, wait for the word.
+
+If you feel the urge to commit, STOP and ask. The user has been clear
+about this multiple times. Violating this rule is a trust violation.
+
+**Correct workflow:**
+1. Make changes
+2. Run `git diff` / `git status --short`
+3. Show the user what changed
+4. WAIT for "commit" or "commit and push"
+5. Only then: `git add ... && git commit ... && git push ...`
+
+**NEVER** run `git add -A && git commit && git push` as part of a
+feature build or content update without step 4.
+
+---
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

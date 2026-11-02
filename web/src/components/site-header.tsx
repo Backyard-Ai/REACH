@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { NavLinks, type NavItem } from "./nav-links";
 
 const NAV_ITEMS: NavItem[] = [
@@ -14,10 +15,17 @@ export function SiteHeader() {
       <div className="mx-auto w-full max-w-6xl px-4 py-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <Link
           href="/"
-          className="flex items-center min-h-11 font-headline font-bold text-xl text-brand-primary no-underline"
+          className="flex items-center min-h-11 no-underline"
+          aria-label="Northeast Tennessee Reach — home"
         >
-          {/* Wordmark placeholder — replaced by the brand logo mark */}
-          Northeast Tennessee Reach
+          <Image
+            src="/NETN_REACH_wordmark.png"
+            alt="Northeast Tennessee Reach"
+            width={200}
+            height={77}
+            priority
+            className="w-auto h-auto max-h-14"
+          />
         </Link>
         <Link
           href="/get-help"

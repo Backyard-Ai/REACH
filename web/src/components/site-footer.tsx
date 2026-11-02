@@ -130,7 +130,7 @@ function FooterMain() {
         </div>
       </div>
       <div className="border-t border-white/20">
-        <p className="mx-auto w-full max-w-6xl px-4 py-3 text-sm text-white/85 m-0">
+        <p className="mx-auto w-full max-w-6xl px-4 py-3 text-sm text-white/85 m-0 text-center">
           Northeast Tennessee Reach · Listing information is reviewed by
           people, for people. Every listing page shows when it was last
           verified. ·{" "}
