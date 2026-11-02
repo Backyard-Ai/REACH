@@ -10,6 +10,7 @@ import {
 import { formatDate, telHref } from "@/lib/format";
 import { SkeletonFilters, SkeletonResults } from "@/components/skeletons";
 import { CopyResultsButton } from "@/components/copy-results-button";
+import { ProfessionalChatbot } from "@/components/professional-chatbot";
 
 export const metadata = {
   title: "For Professionals",
@@ -305,6 +306,21 @@ async function ProResults({
         with last-verified dates. Suitable for pasting into a clinical note
         or EHR. The print view produces a clean handout.
       </p>
+
+      <section aria-labelledby="pro-navigator" className="mt-12">
+        <h2
+          id="pro-navigator"
+          className="font-headline font-bold text-2xl text-brand-primary m-0 mb-2"
+        >
+          Ask the Professional Navigator
+        </h2>
+        <p className="text-base text-text-body mb-4 m-0">
+          Answers from the published directory listings only — not medical
+          advice. For urgent situations, the Navigator always surfaces the
+          crisis line.
+        </p>
+        <ProfessionalChatbot />
+      </section>
     </div>
   );
 }

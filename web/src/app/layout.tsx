@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NavigatorButton } from "@/components/navigator-button";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
@@ -47,6 +48,9 @@ export default function RootLayout({
           {children}
         </main>
         <SiteFooter />
+
+        {/* CustomGPT floating Navigator button (public-facing chatbot) */}
+        <NavigatorButton />
       </body>
     </html>
   );
