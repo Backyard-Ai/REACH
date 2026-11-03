@@ -18,6 +18,16 @@ export const metadata = {
     "Professional-facing directory: full taxonomy filters, deterministic copy-results export, and print-ready handouts. Built from the published data with last-verified dates.",
 };
 
+function buildPageUrl(q: string, category: string, county: string, page: number): string {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  if (category) params.set("category", category);
+  if (county) params.set("county", county);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return qs ? `/professionals?${qs}` : "/professionals";
+}
+
 function firstParam(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value[0] ?? "";
   return value ?? "";
@@ -30,6 +40,7 @@ export default async function ProfessionalsPage({
   const q = firstParam(sp.q).trim();
   const category = firstParam(sp.category).trim();
   const county = firstParam(sp.county).trim();
+  const page = Math.max(1, Number(firstParam(sp.page)) || 1);
 
   return (
     <div>
@@ -55,7 +66,7 @@ export default async function ProfessionalsPage({
           key={`${q}|${category}|${county}`}
           fallback={<SkeletonResults />}
         >
-          <ProResults q={q} category={category} county={county} />
+          <ProResults q={q} category={category} county={county} page={page} />
         </Suspense>
       </div>
     </div>
@@ -166,14 +177,18 @@ async function ProFilters({
   );
 }
 
+const PER_PAGE = 30;
+
 async function ProResults({
   q,
   category,
   county,
+  page,
 }: {
   q: string;
   category: string;
   county: string;
+  page: number;
 }) {
   await connection();
   const { data: resources, dbError } = await searchResources({
@@ -183,6 +198,11 @@ async function ProResults({
   });
 
   const exportText = formatExport(resources, { q, category, county });
+  const totalPages = Math.ceil(resources.length / PER_PAGE);
+  const start = (page - 1) * PER_PAGE;
+  const paged = resources.slice(start, start + PER_PAGE);
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
 
   return (
     <div className="mt-6">
@@ -190,7 +210,7 @@ async function ProResults({
         <p className="text-base text-text-body m-0" role="status">
           {dbError
             ? "The directory is temporarily unavailable — please try again shortly."
-            : `${resources.length} ${resources.length === 1 ? "organisation" : "organisations"}`}
+            : `${resources.length} ${resources.length === 1 ? "organisation" : "organisations"}${totalPages > 1 ? ` · showing ${start + 1}–${Math.min(start + PER_PAGE, resources.length)}` : ""}`}
           {category && ` · ${category}`}
           {county && ` · ${county} County`}
           {q && ` · matching "${q}"`}
@@ -239,7 +259,7 @@ async function ProResults({
               </tr>
             </thead>
             <tbody>
-              {resources.map((r, i) => (
+              {paged.map((r, i) => (
                 <tr
                   key={r.slug}
                   className={i % 2 === 0 ? "bg-surface" : "bg-surface-raise"}
@@ -301,10 +321,42 @@ async function ProResults({
         </div>
       )}
 
+      {totalPages > 1 && (
+        <nav aria-label="Pagination" className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          {hasPrev ? (
+            <a
+              href={buildPageUrl(q, category, county, page - 1)}
+              className="flex items-center min-h-11 px-4 rounded-md border border-[#C9C9CE] bg-surface-raise text-text-body no-underline font-semibold text-sm hover:border-brand-action"
+            >
+              ← Previous
+            </a>
+          ) : (
+            <span className="flex items-center min-h-11 px-4 rounded-md border border-surface bg-surface text-text-body/40 font-semibold text-sm cursor-not-allowed">
+              ← Previous
+            </span>
+          )}
+          <span className="text-sm text-text-body px-2">
+            Page {page} of {totalPages}
+          </span>
+          {hasNext ? (
+            <a
+              href={buildPageUrl(q, category, county, page + 1)}
+              className="flex items-center min-h-11 px-4 rounded-md border border-[#C9C9CE] bg-surface-raise text-text-body no-underline font-semibold text-sm hover:border-brand-action"
+            >
+              Next →
+            </a>
+          ) : (
+            <span className="flex items-center min-h-11 px-4 rounded-md border border-surface bg-surface text-text-body/40 font-semibold text-sm cursor-not-allowed">
+              Next →
+            </span>
+          )}
+        </nav>
+      )}
+
       <p className="mt-6 text-sm text-text-body/70 m-0">
-        Export format: plain text, deterministic (same filters → same output),
-        with last-verified dates. Suitable for pasting into a clinical note
-        or EHR. The print view produces a clean handout.
+        Copy results exports <strong>all {resources.length} matching organisations</strong>
+        (not just this page). Plain text, deterministic, with last-verified
+        dates. The print view produces a clean handout.
       </p>
 
       <section aria-labelledby="pro-navigator" className="mt-12">
