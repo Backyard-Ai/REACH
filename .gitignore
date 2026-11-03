@@ -2,3 +2,4 @@
 .env*
 !.env.directus.example
 .APPROVED_COMMIT
+supabase/.temp/
