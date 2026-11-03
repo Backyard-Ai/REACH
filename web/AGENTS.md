@@ -2,22 +2,29 @@
 
 ## NEVER COMMIT OR PUSH WITHOUT EXPLICIT USER APPROVAL
 
-**The user must see the diff and say "commit" or "commit and push" first.**
-No exceptions. No assumptions. No "they approved this pattern before."
-Every commit, every push, every time — show the diff, wait for the word.
+**The user must see the diff and say the exact words "commit" or
+"commit and push" first.** No exceptions. No assumptions. No reading
+between the lines. No "they were leading up to it." Only the literal
+words "commit" or "commit and push" count.
 
-If you feel the urge to commit, STOP and ask. The user has been clear
-about this multiple times. Violating this rule is a trust violation.
+**The pre-commit hook requires .APPROVED_COMMIT. You are FORBIDDEN
+from creating this file. Only the USER may create it by running
+`touch ~/trabalho/REACH/.APPROVED_COMMIT` in a separate terminal.**
+If you feel the urge to `touch .APPROVED_COMMIT`, STOP. That is
+the same as committing without permission.
 
 **Correct workflow:**
 1. Make changes
 2. Run `git diff` / `git status --short`
 3. Show the user what changed
-4. WAIT for "commit" or "commit and push"
-5. Only then: `git add ... && git commit ... && git push ...`
+4. WAIT for the user to type "commit" or "commit and push"
+5. Say: "Please run `touch ~/trabalho/REACH/.APPROVED_COMMIT`"
+6. Wait for the user to confirm
+7. Only then: `git add ... && git commit ... && git push ...`
 
-**NEVER** run `git add -A && git commit && git push` as part of a
-feature build or content update without step 4.
+**NEVER run `touch .APPROVED_COMMIT` yourself.**
+**NEVER run `git add -A && git commit && git push` without steps 4-6.**
+**NEVER assume approval from context, conversation flow, or past patterns.
 
 ---
 

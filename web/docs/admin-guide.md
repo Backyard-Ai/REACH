@@ -137,7 +137,7 @@ after), verify each number and update the date. This is the data the
 | **Administrator** | Everything — including publishing, managing users, and editing the data model |
 | **Editor** | Edit listings, review submissions, but cannot publish (that requires the admin click) |
 
-To add an editor: Settings → User Directory → Create New → set role to Editor.
+To add an editor/admin: Settings → User Directory → Create New → set role to Editor/Admin.
 
 ---
 
@@ -156,5 +156,4 @@ To add an editor: Settings → User Directory → Create New → set role to Edi
 
 ---
 
-*Questions? Check the main HANDOVER.md at the repo root, or contact
-Silvia (during the transition period).*
+*Questions? Check the main HANDOVER.md at the repo root.*

@@ -2,7 +2,7 @@
 
 **Northeast Tennessee REACH (Recovery Ecosystem – Access to Care and Health)**
 Recovery resource directory for ten Northeast Tennessee counties.
-Built by Silvia Barros / Bandida Tech Pte. Ltd., handed over to the REACH team at ETSU.
+Built by Silvia Barros / Bandida Tech Pte. Ltd., handed over to Nick/BackyardAI.
 
 ---
 
@@ -46,9 +46,7 @@ A mobile-first recovery resource directory with three audiences:
 | **Cloudflare** | Turnstile (spam protection) | REACH | Cloudflare dashboard |
 | **CustomGPT** | AI Navigator chatbots | Backyard AI | Nick's account |
 
-> **All accounts are under REACH/Backyard-AI ownership.** Fly.io was
-> transferred to Nick's org (nick-swope) in November 2026. Vercel was
-> always under Nick's account.
+> **All accounts are under REACH/Backyard-AI ownership.**
 
 ### Environment variables
 
@@ -123,6 +121,12 @@ in the review queue.
 Detailed guide: `web/docs/admin-guide.md`
 
 ### Monthly data refresh
+
+> **Prefer editing directly in Directus.** If the team adds and updates
+> listings through Directus (or the public submission form), this step is
+> unnecessary — changes go live immediately. The spreadsheet import is
+> only needed if the team continues producing a master spreadsheet as
+> the source of truth.
 
 When a new master spreadsheet arrives:
 
