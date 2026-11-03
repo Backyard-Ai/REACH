@@ -1,5 +1,7 @@
 # Northeast Tennessee Reach — web
 
+> **New to this project?** Start with [`../HANDOVER.md`](../HANDOVER.md) — the complete handover guide with accounts, architecture, and runbooks. Admin editors: see [`docs/admin-guide.md`](docs/admin-guide.md).
+
 Mobile-first recovery resource directory for ten Northeast Tennessee
 counties (REACH project, ETSU-affiliated). Next.js 16 (App Router,
 TypeScript strict) + Tailwind v4 + Supabase Postgres, targeting WCAG 2.1
