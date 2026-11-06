@@ -461,7 +461,7 @@ export async function getPublishedMeetings(
     // day filtering runs inside Postgres via jsonb containment on the
     // view's schedule column — the dataset never leaves the server whole.
     if (filter.day && filter.day !== "all") {
-      query = query.contains("schedule", [{ day: filter.day }]);
+      query = query.contains("schedule", JSON.stringify([{ day: filter.day }]));
     }
     if (filter.fellowship) {
       query = query.eq("fellowship", filter.fellowship);

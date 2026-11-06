@@ -32,7 +32,7 @@ function firstParam(value: string | string[] | undefined): string {
 
 function link(day: string, fellowship: string): string {
   const params = new URLSearchParams();
-  if (day && day !== "all") params.set("day", day);
+  if (day) params.set("day", day);
   if (fellowship) params.set("fellowship", fellowship);
   const qs = params.toString();
   return qs ? `/meetings?${qs}` : "/meetings";
@@ -170,8 +170,8 @@ async function MeetingList({
       </p>
 
       {meetings.length === 0 && !dbError ? (
-        <div className="mt-4 bg-surface rounded-lg p-6">
-          <p className="mt-0 mb-3">
+        <div className="mt-4 bg-surface rounded-lg p-6 min-h-48 flex items-center">
+          <p className="m-0">
             Nothing scheduled{day === "all" ? "" : ` on ${weekdayLabel(day)}s`}
             {fellowship ? ` for ${fellowship}` : ""}. Try another day — or{" "}
             <Link
