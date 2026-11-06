@@ -155,7 +155,7 @@ export default async function GetHelpPage() {
           </Link>{" "}
           or{" "}
           <Link
-            href="/resources?topic=someone-to-talk-to"
+            href="/resources?topic=help-for-family-and-friends"
             className="text-brand-action font-semibold no-underline hover:underline hover:underline-offset-4"
           >
             find someone to talk to

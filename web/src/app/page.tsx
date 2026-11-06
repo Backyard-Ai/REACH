@@ -91,7 +91,7 @@ export default function HomePage() {
             </li>
             <li>
               <Link
-                href="/resources?topic=someone-to-talk-to"
+                href="/resources?topic=help-for-family-and-friends"
                 className="block h-full bg-surface-raise rounded-lg border border-surface border-l-4 border-l-brand-action p-5 no-underline hover:border-brand-action"
               >
                 <h3 className="font-subhead font-bold text-xl text-brand-primary mt-0 mb-1">
